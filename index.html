@@ -60,15 +60,7 @@
     <div id="p-splash" class="page active">
         <h1 style="font-size: 50px;">🎓 </h1>
         <h2 style="text-align: center;">እንኳን ወደ መርጡለ ማርያም 2ኛ ደረጃ ትምህርት ቤት የፈተና መማመጃ ሲስተም በደህና መጡ!</h2>
-        <p style="font-size: 20px; color: var(--accent);">አዘጋጅ: በረከት ቀናው 
-        
-        
-        
-        
-        
-        
-        
-        (Grade 11 Student) 2018 </p>
+        <p style="font-size: 20px; color: var(--accent);">አዘጋጅ: በረከት ቀናው (Grade 11 Student) 2018 </p>
         <button class="btn btn-main" style="width: 250px;" onclick="doLogin()">ይግቡ (ENTER)</button>
     </div>
 
@@ -121,12 +113,12 @@
         </div>
     </div>
 
-    <div id="p-result" class="page">
-        <h1>ፈተናውን ጨርሰዋል!</h1>
-        <div id="score-txt" style="font-size:80px; font-weight:900; color:var(--accent);">0/0</div>
-        <div style="display:flex; gap:20px;">
-            <button class="btn btn-main" onclick="showReview()">የመልስ ማብራሪያ (REVIEW)</button>
-            <button class="btn" style="background:#475569; color:white;" onclick="nav('p-years')">ተመለስ</button>
+    <div id="p-result" class="page" style="max-height: 90vh; overflow-y: auto; padding-bottom: 40px;">
+        <h2>📊 የፈተና ውጤት እና የኢንተለጀንስ ትንተና</h2>
+        <div id="score-txt"></div>
+        <div style="margin-top: 25px; display: flex; gap: 15px; justify-content: center;">
+            <button class="btn btn-main" onclick="showReview()">🧐 የመልስ ማብራሪያ (REVIEW)</button>
+            <button class="btn" style="background:#475569; color:white;" onclick="goBackFromSubs()">🏠 ወደ ማውጫ ተመልስ</button>
         </div>
     </div>
 
@@ -135,7 +127,9 @@
         <h1>የመልስ ማብራሪያ (Review)</h1>
         <div id="review-list" style="width:100%; display:flex; flex-direction:column; align-items:center;"></div>
     </div>
-            // 1. ዋና ዋና ተለዋዋጮች
+
+    <script>
+        // 1. ዋና ዋና ተለዋዋጮች
         let curStr = '', curSub = '', examSet = [], userAns = [], qIdx = 0, timer = null, isModel = false;
 
         // --- EXAM INTELLIGENCE TRACKING VARIABLES ---
@@ -311,7 +305,7 @@
             let totalQuestions = examSet.length;
             let percentage = (score / totalQuestions) * 100;
 
-            [span_2](start_span)// 1. Weak Topic Detector (ደካማ ጎንን መለያ)[span_2](end_span)
+            // 1. Weak Topic Detector (ደካማ ጎንን መለያ)
             let weakestTopic = "የለም (ሁሉንም ቶፒክ በአሪፍ ሁኔታ ሰርተሃል!)";
             let maxErrors = 0;
             Object.keys(topicErrors).forEach(t => {
@@ -321,7 +315,7 @@
                 }
             });
 
-            [span_3](start_span)// 2. Error DNA Analysis (የስህተት ጠባይ ትንተና)[span_3](end_span)
+            // 2. Error DNA Analysis (የስህተት ጠባይ ትንተና)
             let carelessErrors = 0;  // በችኮላ (ከ12 ሰከንድ በታች የፈጁ ስህተቶች)
             let conceptualErrors = 0; // በዕውቀት ማነስ (ከ45 ሰከንድ በላይ አስቦባቸው የተሳሳቱ)
 
@@ -334,11 +328,10 @@
                 }
             });
 
-            [span_4](start_span)// 3. Predicted Score Engine (የመጪው ብሄራዊ ፈተና ውጤት ትንበያ)[span_4](end_span)
-            // የኦንላይን ፈተናን ጫና (CBT Pressure) ታሳቢ ያደረገ ስሌት
+            // 3. Predicted Score Engine (የመጪው ብሄራዊ ፈተና ውጤት ትንበያ)
             let predictedScore = Math.round(percentage * 0.95); 
 
-            [span_5](start_span)// 4. Exam Readiness Meter (የዝግጁነት ደረጃ ከ 100%)[span_5](end_span)
+            // 4. Exam Readiness Meter (የዝግጁነት ደረጃ ከ 100%)
             let readinessMeter = Math.round(percentage);
 
             // ውጤቱን በዋናው ገፅ ላይ ማሳየት (ከተጨማሪ AI-driven ማብራሪያዎች ጋር)
@@ -371,9 +364,9 @@
                     <h3 style="color: var(--accent); margin-top: 0;">📊 What-If Simulator (ዒላማ ማስያ)</h3>
                     <p style="font-size:15px; color:#94a3b8;">ብሄራዊ ፈተና ላይ የምትፈልገውን ጠቅላላ ውጤት ለማስላት እዚህ እሴቶቹን ቀይረህ እይ፦</p>
                     <div style="display:flex; gap:15px; align-items:center; flex-wrap:wrap;">
-                        <label>እንግሊዘኛ፡ <input type="number" id="simEng" value="${Math.round(percentage)}" style="width:60px; padding:5px; border-radius:5px;" oninput="runWhatIf()"></label>
-                        <label>ሂሳብ፡ <input type="number" id="simMath" value="70" style="width:60px; padding:5px; border-radius:5px;" oninput="runWhatIf()"></label>
-                        <label>የሌሎች 4 ቱ አማካኝ፡ <input type="number" id="simOthers" value="65" style="width:60px; padding:5px; border-radius:5px;" oninput="runWhatIf()"></label>
+                        <label>እንግሊዘኛ፡ <input type="number" id="simEng" value="${Math.round(percentage)}" style="width:60px; padding:5px; border-radius:5px; color:black;" oninput="runWhatIf()"></label>
+                        <label>ሂሳብ፡ <input type="number" id="simMath" value="70" style="width:60px; padding:5px; border-radius:5px; color:black;" oninput="runWhatIf()"></label>
+                        <label>የሌሎች 4 ቱ አማካኝ፡ <input type="number" id="simOthers" value="65" style="width:60px; padding:5px; border-radius:5px; color:black;" oninput="runWhatIf()"></label>
                     </div>
                     <h4 style="margin: 15px 0 5px 0;">የታለመው ጠቅላላ ውጤት፦ <span id="simTotal" style="color:var(--accent); font-size:22px;">0</span> / 600</h4>
                     <p id="simFeedback" style="font-size:15px; font-weight:bold; margin:0;"></p>
@@ -384,7 +377,7 @@
             runWhatIf(); // ሲሙሌተሩን በሪፖርቱ ቅፅበት ማስላት
         }
 
-        [span_6](start_span)// የ What-If Simulator አሰራር ስሌት[span_6](end_span)
+        // የ What-If Simulator አሰራር ስሌት
         function runWhatIf() {
             let eng = parseInt(document.getElementById('simEng').value) || 0;
             let math = parseInt(document.getElementById('simMath').value) || 0;
@@ -420,6 +413,6 @@
             });
             nav('p-review');
         }
-
+    </script>
 </body>
 </html>
