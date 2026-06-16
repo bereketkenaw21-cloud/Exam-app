@@ -371,7 +371,6 @@
             overlay.style.display = (overlay.style.display === 'block') ? 'none' : 'block';
         }
 
-        // ሁሉንም 23 ፋይሎች በተሳካ ሁኔታ ማገናኘቱን ማረጋገጫ ሎጂክ
         window.addEventListener('DOMContentLoaded', () => {
             console.log("⚓ GitHub Core Linker & Multi-File System initialized.");
             let loadedDBs = [];
@@ -474,8 +473,8 @@
             let container = document.getElementById('sub-list');
             container.innerHTML = "";
             
-            // አዳዲስ የትምህርት አይነቶች ሲጨመሩ በራስ ሰር እንዲካተቱ የተደረገ መዋቅር
-            let list = stream === 'Natural' ? ['Biology', 'Chemistry', 'Physics', 'English', 'Maths', 'Civics', 'Aptitude'] : ['History', 'Geography', 'Economics', 'English', 'Maths', 'Civics', 'Aptitude'];
+            // SOMALI NATURAL EXAM 4ኛ ደረጃ ላይ ተጨምሯል
+            let list = stream === 'Natural' ? ['Biology', 'Chemistry', 'Physics', 'Somali Natural Exam', 'English', 'Maths', 'Civics', 'Aptitude'] : ['History', 'Geography', 'Economics', 'English', 'Maths', 'Civics', 'Aptitude'];
             list.forEach(s => {
                 let d = document.createElement('div'); d.className = "card"; d.innerText = `📚 ${s.toUpperCase()}`;
                 d.onclick = () => { currentSubject = s; showLevelConfig(); };
@@ -497,7 +496,7 @@
             let desc = document.getElementById('level-desc');
             if(v <= 30) { desc.innerText = `ደረጃ 1፡ መሰረታዊ እና በጣም ቀላል ጥያቄዎች (ለጀማሪ)`; desc.style.color = "var(--correct)"; }
             else if(v <= 60) { desc.innerText = `ደረጃ 2፡ መካከለኛ ማገናዘቢያ እና ስሌት ጥያቄዎች (ለማጠናከሪያ)`; desc.style.color = "var(--warning)"; }
-            else { desc.innerText = `ደረጃ 3፡ ከፍተኛ እና እውነተኛ የብሔራዊ ኢንትራንስ ፈተና ደረጃ`; desc.style.color = "var(--wrong)"; }
+            else { desc.innerText = `ደረጃ 3፡ xenon ከፍተኛ እና እውነተኛ የብሔራዊ ኢንትራንስ ፈተና ደረጃ`; desc.style.color = "var(--wrong)"; }
         }
 
         function updatePDFLevelSlider(v) {
@@ -662,13 +661,28 @@
             sourceMode = "db";
             let rawData = [];
             
-            if(typeof QUESTIONS_DB !== 'undefined' && QUESTIONS_DB[currentStream] && QUESTIONS_DB[currentStream][currentSubject]) {
-                let subObj = QUESTIONS_DB[currentStream][currentSubject];
-                Object.keys(subObj).forEach(yr => rawData = rawData.concat(subObj[yr]));
-            }
-            if(typeof QUESTIONS_DB !== 'undefined' && QUESTIONS_DB.Common && QUESTIONS_DB.Common[currentSubject]) {
-                let subObj = QUESTIONS_DB.Common[currentSubject];
-                Object.keys(subObj).forEach(yr => rawData = rawData.concat(subObj[yr]));
+            // Somali Natural Exam ከተመረጠ እና በውስጥ የተቀበሩ ጥያቄዎች ካሉ የሚሰራበት ሎጂክ
+            if (currentSubject === 'Somali Natural Exam') {
+                if (typeof QUESTIONS_DB !== 'undefined' && QUESTIONS_DB[currentStream] && QUESTIONS_DB[currentStream]['Somali Natural Exam']) {
+                    let subObj = QUESTIONS_DB[currentStream]['Somali Natural Exam'];
+                    Object.keys(subObj).forEach(yr => rawData = rawData.concat(subObj[yr]));
+                } else {
+                    // የሙከራ ጥያቄዎች (Fallback Questions) አንተ አስቀድመህ የቀበርካቸው ጥያቄዎች ባዶ ከሆኑ እንዳይቋረጥ
+                    rawData = [
+                        { q: "What is the primary natural resources found in the Somali region ecosystem?", opts: ["Natural Gas and Oil**", "Coal", "Gold", "Bauxite"], level: 20, topic: "Ecosystem" },
+                        { q: "Which river flows through the Somali region of Ethiopia?", opts: ["Wabi Shebelle**", "Abay", "Awash", "Omo"], level: 50, topic: "Geography" },
+                        { q: "Which climatic zone dominates the overall Somali regional territory?", opts: ["Arid and Semi-arid**", "Tropical Rainforest", "Alpine", "Mediterranean"], level: 80, topic: "Climate" }
+                    ];
+                }
+            } else {
+                if(typeof QUESTIONS_DB !== 'undefined' && QUESTIONS_DB[currentStream] && QUESTIONS_DB[currentStream][currentSubject]) {
+                    let subObj = QUESTIONS_DB[currentStream][currentSubject];
+                    Object.keys(subObj).forEach(yr => rawData = rawData.concat(subObj[yr]));
+                }
+                if(typeof QUESTIONS_DB !== 'undefined' && QUESTIONS_DB.Common && QUESTIONS_DB.Common[currentSubject]) {
+                    let subObj = QUESTIONS_DB.Common[currentSubject];
+                    Object.keys(subObj).forEach(yr => rawData = rawData.concat(subObj[yr]));
+                }
             }
             
             let injected = JSON.parse(localStorage.getItem('mm_injected') || "[]");
