@@ -135,10 +135,15 @@
         <h1>የመልስ ማብራሪያ (Review)</h1>
         <div id="review-list" style="width:100%; display:flex; flex-direction:column; align-items:center;"></div>
     </div>
-
-    <script>
+            // 1. ዋና ዋና ተለዋዋጮች
         let curStr = '', curSub = '', examSet = [], userAns = [], qIdx = 0, timer = null, isModel = false;
 
+        // --- EXAM INTELLIGENCE TRACKING VARIABLES ---
+        let qStartTime = null;      // ለእያንዳንዱ ጥያቄ የፈጀውን ሰዓት መለኪያ
+        let userQuestionLog = [];   // የእያንዳንዱን ጥያቄ ውጤት እና ጊዜ መመዝገቢያ
+        let topicErrors = {};       // በየቶፒኩ የተሰሩ ስህተቶች መቁጠሪያ
+
+        // የቁልፍ ሰሌዳ (Keyboard) አጠቃቀም
         document.onkeydown = (e) => {
             if(e.key === "Enter" && document.getElementById('p-splash').classList.contains('active')) doLogin();
             if(!document.getElementById('p-exam').classList.contains('active')) return;
@@ -190,16 +195,28 @@
             nav('p-years');
         }
 
+        // ፈተና ሲጀመር መከታተያዎቹን ዜሮ ማድረግ
         function startExam(data) {
-            examSet = data; userAns = new Array(data.length).fill(null); qIdx = 0;
-            buildGrid(); renderQ(); startTimer(100); nav('p-exam');
+            examSet = data; 
+            userAns = new Array(data.length).fill(null); 
+            qIdx = 0;
+            
+            // የኢንተለጀንስ መከታተያዎችን ማፅዳት
+            userQuestionLog = [];
+            topicErrors = {};
+            
+            buildGrid(); 
+            renderQ(); 
+            startTimer(100); 
+            nav('p-exam');
         }
 
         function buildGrid() {
             const grid = document.getElementById('q-grid'); grid.innerHTML = "";
             examSet.forEach((_, i) => {
                 let b = document.createElement('button'); b.className = "grid-num"; b.id = `gn-${i}`; b.innerText = i + 1;
-                b.onclick = () => { qIdx = i; renderQ(); }; grid.appendChild(b);
+                b.onclick = () => { processTimeSpent(); qIdx = i; renderQ(); }; 
+                grid.appendChild(b);
             });
         }
 
@@ -217,6 +234,9 @@
             document.querySelectorAll('.grid-num').forEach(el => el.classList.remove('current'));
             document.getElementById(`gn-${qIdx}`).classList.add('current');
             document.getElementById('btn-next').innerText = (qIdx === examSet.length - 1) ? "ጨርስ (FINISH)" : "ቀጣይ (→)";
+            
+            // ጥያቄው ለተማሪው መታየት የጀመረበትን ሰዓት መመዝገብ
+            qStartTime = new Date();
         }
 
         function selectOpt(i) {
@@ -225,7 +245,28 @@
             renderQ();
         }
 
+        // ተማሪው ከጥያቄው ሲወጣ የፈጀበትን ሰከንድ ማስላት
+        function processTimeSpent() {
+            if (qStartTime) {
+                let endTime = new Date();
+                let timeSpent = Math.round((endTime - qStartTime) / 1000); // በሰከንድ
+                
+                // የጥያቄውን ቶፒክ መለየት (ፋይሉ ላይ ከሌለ 'አጠቃላይ' ይለዋል)
+                let currentTopic = examSet[qIdx].topic || "አጠቃላይ ጥያቄዎች";
+                
+                // የድሮ ምዝግብ ካለ ማጥፋት (ደግሞ እንዳይቆጥር)
+                userQuestionLog = userQuestionLog.filter(log => log.index !== qIdx);
+                
+                userQuestionLog.push({
+                    index: qIdx,
+                    topic: currentTopic,
+                    timeSpent: timeSpent
+                });
+            }
+        }
+
         function moveQ(n) {
+            processTimeSpent(); // ሰዓቱን መዝግብ
             if(n > 0 && userAns[qIdx] === null) document.getElementById(`gn-${qIdx}`).className = "grid-num skipped";
             if(n > 0 && qIdx === examSet.length - 1) { if(confirm("መጨረስ ይፈልጋሉ?")) finishExam(); return; }
             qIdx += n; if(qIdx < 0) qIdx = 0; if(qIdx >= examSet.length) qIdx = examSet.length -1;
@@ -247,14 +288,115 @@
             }, 1000);
         }
 
+        // --- EXAM INTELLIGENCE CORE ENGINE ---
         function finishExam() {
-            clearInterval(timer); let score = 0;
+            processTimeSpent(); // የመጨረሻውን ጥያቄ ሰዓት መዝግብ
+            clearInterval(timer); 
+            let score = 0;
+            topicErrors = {};
+
             examSet.forEach((item, i) => {
                 let correctIdx = item.opts.findIndex(o => o.includes('**'));
-                if(userAns[i] === correctIdx) score++;
+                let isCorrect = (userAns[i] === correctIdx);
+                
+                if(isCorrect) {
+                    score++;
+                } else {
+                    // ስህተቶችን በየቶፒኩ መመዝገብ (Weak Topic Detector)
+                    let t = item.topic || "አጠቃላይ ጥያቄዎች";
+                    topicErrors[t] = (topicErrors[t] || 0) + 1;
+                }
             });
-            document.getElementById('score-txt').innerText = `${score} / ${examSet.length}`;
+
+            let totalQuestions = examSet.length;
+            let percentage = (score / totalQuestions) * 100;
+
+            [span_2](start_span)// 1. Weak Topic Detector (ደካማ ጎንን መለያ)[span_2](end_span)
+            let weakestTopic = "የለም (ሁሉንም ቶፒክ በአሪፍ ሁኔታ ሰርተሃል!)";
+            let maxErrors = 0;
+            Object.keys(topicErrors).forEach(t => {
+                if(topicErrors[t] > maxErrors) {
+                    maxErrors = topicErrors[t];
+                    weakestTopic = t;
+                }
+            });
+
+            [span_3](start_span)// 2. Error DNA Analysis (የስህተት ጠባይ ትንተና)[span_3](end_span)
+            let carelessErrors = 0;  // በችኮላ (ከ12 ሰከንድ በታች የፈጁ ስህተቶች)
+            let conceptualErrors = 0; // በዕውቀት ማነስ (ከ45 ሰከንድ በላይ አስቦባቸው የተሳሳቱ)
+
+            userQuestionLog.forEach(log => {
+                let item = examSet[log.index];
+                let correctIdx = item.opts.findIndex(o => o.includes('**'));
+                if (userAns[log.index] !== correctIdx) { // ከተሳሳተ
+                    if (log.timeSpent <= 12) carelessErrors++;
+                    if (log.timeSpent >= 45) conceptualErrors++;
+                }
+            });
+
+            [span_4](start_span)// 3. Predicted Score Engine (የመጪው ብሄራዊ ፈተና ውጤት ትንበያ)[span_4](end_span)
+            // የኦንላይን ፈተናን ጫና (CBT Pressure) ታሳቢ ያደረገ ስሌት
+            let predictedScore = Math.round(percentage * 0.95); 
+
+            [span_5](start_span)// 4. Exam Readiness Meter (የዝግጁነት ደረጃ ከ 100%)[span_5](end_span)
+            let readinessMeter = Math.round(percentage);
+
+            // ውጤቱን በዋናው ገፅ ላይ ማሳየት (ከተጨማሪ AI-driven ማብራሪያዎች ጋር)
+            document.getElementById('score-txt').innerHTML = `
+                <div style="font-size:75px; font-weight:900; color:var(--accent);">${score} / ${totalQuestions} (${percentage.toFixed(1)}%)</div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; font-size: 18px; text-align: left; background: rgba(255,255,255,0.05); padding: 25px; border-radius: 15px; margin-top: 20px; border: 1px solid rgba(255,255,255,0.1);">
+                    <div>
+                        <p>🎯 <b>ለፈተና የመዘጋጀት ደረጃ (Readiness Meter):</b> 
+                            <span style="color:#22c55e; font-weight:bold;">${readinessMeter}%</span>
+                        </p>
+                        <p>🔮 <b>የብሄራዊ ፈተና ትንበያ ውጤት (Predicted Score):</b> 
+                            <span style="color:#fbbf24; font-weight:bold;">${predictedScore} / 100</span>
+                        </p>
+                    </div>
+                    <div>
+                        <p>🔍 <b>የበለጠ ትኩረት የሚሻው ክፍል (Weak Topic):</b> 
+                            <span style="color:#ef4444; font-weight:bold;">${weakestTopic}</span>
+                        </p>
+                        <p>🧬 <b>የስህተት ባህሪ ትንተና (Error DNA):</b> <br>
+                            <span style="font-size:15px; color:#94a3b8;">
+                                - በችኮላ/በመደናገጥ የተሳሳቱ፡ <b style="color:white">${carelessErrors}</b><br>
+                                - በፅንሰ-ሀሳብ ክፍተት የተሳሳቱ፡ <b style="color:white">${conceptualErrors}</b>
+                            </span>
+                        </p>
+                    </div>
+                </div>
+
+                <div style="background: rgba(0, 0, 0, 0.4); padding: 20px; border-radius: 15px; margin-top: 25px; font-size: 18px; text-align: left; border: 1px solid var(--accent);">
+                    <h3 style="color: var(--accent); margin-top: 0;">📊 What-If Simulator (ዒላማ ማስያ)</h3>
+                    <p style="font-size:15px; color:#94a3b8;">ብሄራዊ ፈተና ላይ የምትፈልገውን ጠቅላላ ውጤት ለማስላት እዚህ እሴቶቹን ቀይረህ እይ፦</p>
+                    <div style="display:flex; gap:15px; align-items:center; flex-wrap:wrap;">
+                        <label>እንግሊዘኛ፡ <input type="number" id="simEng" value="${Math.round(percentage)}" style="width:60px; padding:5px; border-radius:5px;" oninput="runWhatIf()"></label>
+                        <label>ሂሳብ፡ <input type="number" id="simMath" value="70" style="width:60px; padding:5px; border-radius:5px;" oninput="runWhatIf()"></label>
+                        <label>የሌሎች 4 ቱ አማካኝ፡ <input type="number" id="simOthers" value="65" style="width:60px; padding:5px; border-radius:5px;" oninput="runWhatIf()"></label>
+                    </div>
+                    <h4 style="margin: 15px 0 5px 0;">የታለመው ጠቅላላ ውጤት፦ <span id="simTotal" style="color:var(--accent); font-size:22px;">0</span> / 600</h4>
+                    <p id="simFeedback" style="font-size:15px; font-weight:bold; margin:0;"></p>
+                </div>
+            `;
+            
             nav('p-result');
+            runWhatIf(); // ሲሙሌተሩን በሪፖርቱ ቅፅበት ማስላት
+        }
+
+        [span_6](start_span)// የ What-If Simulator አሰራር ስሌት[span_6](end_span)
+        function runWhatIf() {
+            let eng = parseInt(document.getElementById('simEng').value) || 0;
+            let math = parseInt(document.getElementById('simMath').value) || 0;
+            let others = parseInt(document.getElementById('simOthers').value) || 0;
+            
+            let total = eng + math + (others * 4);
+            document.getElementById('simTotal').innerText = total;
+            
+            let fb = document.getElementById('simFeedback');
+            if(total >= 500) { fb.innerText = "🌟 ድንቅ ነው! ይህ ውጤት ከፍተኛ ካምፓስ (AAU, ASTU...) በክብር ያስገባሃል!"; fb.style.color = "#22c55e"; }
+            else if(total >= 370) { fb.innerText = "👍 በጣም አሪፍ! የመንግስት ዩኒቨርሲቲ መግቢያ አስተማማኝ ማለፊያ ውጤት ነው!"; fb.style.color = "#00d2ff"; }
+            else { fb.innerText = "⚠️ ጥረትን ይጨምራል! በሲስተሙ ላይ በደንብ መለማመድህን ቀጥል!"; fb.style.color = "#ef4444"; }
         }
 
         function showReview() {
@@ -268,7 +410,7 @@
                 let div = document.createElement('div');
                 div.className = "review-item " + (isCorrect ? "is-correct" : "");
                 div.innerHTML = `
-                    <p style="font-weight:bold; color:var(--accent);">ጥያቄ ${i+1}: ${item.q}</p>
+                    <p style="font-weight:bold; color:var(--accent);">ጥያቄ ${i+1}: ${item.q} <span style="font-size:12px; color:#94a3b8; font-weight:normal; float:right;">[ዘርፍ፦ ${item.topic || 'አጠቃላይ'}]</span></p>
                     <p style="color:${isCorrect ? 'var(--correct)' : 'var(--wrong)'}">
                         የመረጥከው መልስ፦ <b>${userText}</b>
                     </p>
@@ -278,6 +420,6 @@
             });
             nav('p-review');
         }
-    </script>
+
 </body>
 </html>
