@@ -12,7 +12,10 @@
     <script src="biology_model.js"></script><script src="chemistry_model.js"></script><script src="physics_model.js"></script>
     <script src="history_model.js"></script><script src="geography_model.js"></script><script src="economics_model.js"></script>
     <script src="english_model.js"></script><script src="maths_model.js"></script><script src="aptitude_model.js"></script>
+    
     <script src="pdf.min.js"></script>
+    <script src="compromise-sentences.js"></script>
+    <script src="string-similarity.js"></script>
 
     <style>
         :root {
@@ -183,7 +186,6 @@
         .analytics-box { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08) !important; padding: 3vh; border-radius: 14px; margin-bottom: 3vh; text-align: left; }
         .light-theme .analytics-box { background: rgba(0,0,0,0.02); border: 1px solid rgba(0,0,0,0.06) !important; }
 
-        /* የሚያምር ግሎባል የባክ በተን ስታይል */
         .global-back-btn {
             position: fixed;
             top: 25px;
@@ -496,7 +498,6 @@
         let currentLanguage = 'am';
         let activeSelectedFolder = 'Natural'; 
 
-        // የገጽ ታሪክን (Navigation History) ለመቆጣጠር የሚያገለግል ድርድር
         let pageHistory = [];
 
         const TRANSLATIONS = {
@@ -627,7 +628,6 @@
             document.getElementById('ai-career-lbl').innerText = dict.ai_career_lbl;
             document.getElementById('ai-plan-lbl').innerText = dict.ai_plan_lbl;
             
-            // የዳሽቦርድ ፅሁፎችን እንደገና ማደስ
             renderWelcomeDashboard();
         }
 
@@ -652,7 +652,6 @@
             }
         }
 
-        // የተሻሻለ የገፅ አሰሳ ማዕቀፍ (Navigation with automatic back button handling)
         function nav(id) {
             let activePage = document.querySelector('.page.active');
             if (activePage && activePage.id !== id) {
@@ -663,21 +662,18 @@
             document.getElementById(id).classList.add('active');
             window.scrollTo(0,0);
 
-            // የግሎባል ባክ በተን ማሳያ ሎጂክ
             const backBtn = document.getElementById('global-back-button');
             if(id === 'p-login' || id === 'p-profile-setup' || id === 'p-gateway' || id === 'p-exam') {
-                backBtn.style.display = 'none'; // ዋና ወይም የፈተና ገፆች ላይ ይደበቃል
+                backBtn.style.display = 'none'; 
             } else {
-                backBtn.style.display = 'block'; // በሌሎች ላይ በቋሚነት ይወጣል
+                backBtn.style.display = 'block'; 
             }
         }
 
-        // ግሎባል የባክ በተን ሲነካ የሚሰራ ጠንካራ ሎጂክ
         function triggerGlobalBack() {
             if (pageHistory.length > 0) {
                 let prevPageId = pageHistory.pop();
                 
-                // ፈተና ላይ እያለ ወደኋላ መመለስ ከተጫነ ለመጠበቅ
                 document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
                 document.getElementById(prevPageId).classList.add('active');
                 
@@ -695,7 +691,6 @@
         function checkLogin() {
             let inputVal = document.getElementById('pass-input').value.trim();
             if(inputVal === '1234' || inputVal === 'Bereket2127') {
-                // መረጃ አስቀድሞ ካለ ቀጥታ ጌትዌይ፤ ከሌለ ፕሮፋይል መሙያ ገፅ ይሄዳል
                 let savedProfile = localStorage.getItem('mmss_user_profile');
                 if (savedProfile) {
                     renderWelcomeDashboard();
@@ -708,7 +703,6 @@
             }
         }
 
-        // የተማሪ መረጃዎችን በLocalStorage በቋሚነት መያዣ ሎጂክ
         function saveStudentProfile() {
             let name = document.getElementById('stud-name').value.trim();
             let grade = document.getElementById('stud-grade').value;
@@ -728,7 +722,6 @@
             nav('p-gateway');
         }
 
-        // ዳሽቦርድ ላይ ተማሪውን በስሙ ሰላም ለማለት እና ግብ/ራዕዩን ለማሳየት
         function renderWelcomeDashboard() {
             let savedProfile = localStorage.getItem('mmss_user_profile');
             if(!savedProfile) return;
@@ -748,7 +741,7 @@
 
         function chooseGateway(g) {
             curStr = g;
-            pageHistory = ['p-gateway']; // የአሰሳ ታሪክ ማፅጃ
+            pageHistory = ['p-gateway']; 
             if(g === 'ModelExams') {
                 document.getElementById('subj-title').innerText = "የሞዴል ፈተና ዘርፍ";
                 const grid = document.getElementById('subj-grid'); grid.innerHTML = "";
@@ -888,6 +881,9 @@
             }
         }
 
+        // ========================================================
+        // 🚀 100% OFFLINE SMART NLP TEXT EXTRACTOR & EXAM GENERATOR (UPDATED)
+        // ========================================================
         async function processPdfExam() {
             const fileInput = document.getElementById('customPdfFile');
             const examNameInput = document.getElementById('pdfExamName');
@@ -911,7 +907,7 @@
                 return;
             }
 
-            alert(currentLanguage === 'am' ? `⚡ የ AI ትንተና ተጀምሯል። ጽሑፉ ተፈጭቶ ከምዕራፍ ${startCh} - ${endCh} ያሉትን ጥያቄዎች በ '${examName}' ስም ወደ ${targetFolder} ፎልደር እያዘጋጀ ነው...` : `⚡ AI Analysis started. Extracting Questions to ${targetFolder} folder under '${examName}'...`);
+            alert(currentLanguage === 'am' ? `⚡ የ NLP ትንተና ተጀምሯል። ጽሑፉ በክፍሎች ተከፋፍሎ ከምዕራፍ ${startCh} - ${endCh} ያሉትን የኢንትራንስ ዓይነት ጥያቄዎች በ '${examName}' ስም ወደ ${targetFolder} ፎልደር እያዘጋጀ ነው...` : `⚡ NLP Analysis started. Extracting entrance-style questions to ${targetFolder} folder under '${examName}'...`);
 
             const file = fileInput.files[0];
             const fileReader = new FileReader();
@@ -919,24 +915,29 @@
             fileReader.onload = async function() {
                 try {
                     const typedarray = new Uint8Array(this.result);
-                    const pdf = await pdfjsLib.getDocument({data: typedarray, worker: null}).promise;
+                    // Offline Worker Path ማስተካከያ
+                    pdfjsLib.GlobalWorkerOptions.workerSrc = 'pdf.worker.js';
+                    const pdf = await pdfjsLib.getDocument(typedarray).promise;
                     
                     let totalPages = pdf.numPages;
-                    let chaptersCount = 5; 
+                    let chaptersCount = (endCh - startCh) + 1;
+                    if(chaptersCount <= 0) chaptersCount = 5;
                     let pagesPerChapter = Math.floor(totalPages / 10) || 1;
                     
                     let startPage = Math.max(1, (startCh - 1) * pagesPerChapter + 1);
                     let endPage = Math.min(totalPages, endCh * pagesPerChapter);
                     if (startPage > totalPages) startPage = 1;
 
-                    let fullText = "";
+                    let pdfPagesData = [];
                     for (let i = startPage; i <= endPage; i++) {
                         const page = await pdf.getPage(i);
                         const textContent = await page.getTextContent();
-                        fullText += textContent.items.map(item => item.str).join(" ") + " [PAGE_SPLIT] ";
+                        let pageText = textContent.items.map(item => item.str).join(" ");
+                        pdfPagesData.push({ pageNum: i, text: pageText });
                     }
 
-                    const generatedQuestions = generateDynamicPdfExam(fullText, difficulty, (endPage - startPage + 1), targetQCount, startCh);
+                    // ያወረድናቸውን የስማርት አልጎሪዝም ህጎች በመጠቀም ጥያቄ መፍጠር
+                    const generatedQuestions = generateDynamicPdfExam(pdfPagesData, difficulty, targetQCount, startCh, chaptersCount, pagesPerChapter);
                     
                     if(!allExams[targetFolder]) allExams[targetFolder] = {};
                     allExams[targetFolder][examName] = generatedQuestions;
@@ -955,30 +956,56 @@
                     startExam(generatedQuestions);
 
                 } catch (error) {
-                    alert("PDF Error: " + error.message);
+                    alert("PDF Process Error: " + error.message);
                 }
             };
             fileReader.readAsArrayBuffer(file);
         }
 
-        function generateDynamicPdfExam(text, difficulty, totalPages, targetQCount, initialChapter) {
-            const pages = text.split(" [PAGE_SPLIT] ");
-            const chaptersCount = 5; 
-            const pagesPerChapter = Math.max(1, Math.floor(totalPages / chaptersCount));
+        // ========================================================
+        // 🧠 COMPROMISE.JS & STRING-SIMILARITY.JS SMART QUESTION ENGINE
+        // ========================================================
+        function generateDynamicPdfExam(pagesData, difficulty, targetQCount, initialChapter, chaptersCount, pagesPerChapter) {
             let finalQuestionsList = [];
             let targetPerChapter = Math.ceil(targetQCount / chaptersCount);
+            
+            // አጠቃላይ ፅሑፉን ለ String-similarity ማከማቻነት እናደራጀው
+            let globalWordsPool = [];
+            pagesData.forEach(p => {
+                let tokens = p.text.split(/\s+/).map(w => w.replace(/[^a-zA-Z]/g, "")).filter(w => w.length > 4);
+                globalWordsPool.push(...tokens);
+            });
+            globalWordsPool = [...new Set(globalWordsPool)]; // Duplicate ማጥፊያ
 
             for (let ch = 0; ch < chaptersCount; ch++) {
-                let sPage = ch * pagesPerChapter;
-                let ePage = (ch === chaptersCount - 1) ? totalPages : sPage + pagesPerChapter;
+                let currentChapterNum = initialChapter + ch;
                 
-                let chapterText = pages.slice(sPage, ePage).join(" ");
-                let sentences = chapterText.split(/[.!?]+/).filter(s => s.trim().length > 40);
+                // የዚህን ምዕራፍ ገጾች ብቻ ለይተን እንሰብስበው
+                let chStartPage = ((currentChapterNum - 1) * pagesPerChapter) + 1;
+                let chEndPage = currentChapterNum * pagesPerChapter;
                 
+                let chapterText = pagesData
+                    .filter(p => p.pageNum >= chStartPage && p.pageNum <= chEndPage)
+                    .map(p => p.text)
+                    .join(" ");
+
+                if (!chapterText.trim()) continue;
+
+                // 1. Compromise Sentences ን በመጠቀም አህጽሮተ ቃላትን ሳይበላሽ ዓረፍተ ነገር መለየት
+                let sentences = [];
+                if (typeof nlp !== 'undefined' && nlp.tokenize) {
+                    let doc = nlp(chapterText);
+                    sentences = doc.sentences().out('array');
+                } else {
+                    // Fallback መደበኛ ቆራጭ
+                    sentences = chapterText.split(/[.!?\n]+/).filter(s => s.trim().length > 40);
+                }
+
+                // የክብደት ማጣሪያ (Difficulty Filter)
                 let filteredSentences = sentences.filter(s => {
-                    if (difficulty == "20") return s.length < 70;
-                    if (difficulty == "50") return s.length >= 70 && s.length < 130;
-                    return s.length >= 130;
+                    if (difficulty == "20") return s.length < 80;
+                    if (difficulty == "50") return s.length >= 80 && s.length < 150;
+                    return s.length >= 150;
                 });
 
                 let sourceSentences = filteredSentences.length >= targetPerChapter ? filteredSentences : sentences;
@@ -990,28 +1017,54 @@
                     if (addedInChapter >= targetPerChapter || finalQuestionsList.length >= targetQCount) break;
 
                     let sentence = sourceSentences[i].trim();
-                    let words = sentence.split(" ").filter(w => w.length > 0);
-                    if (words.length < 8) continue;
+                    let words = sentence.split(/\s+/);
+                    if (words.length < 10) continue;
 
-                    let minIdx = Math.floor(words.length * 0.2);
-                    let maxIdx = Math.floor(words.length * 0.8);
-                    let blankIndex = Math.floor(Math.random() * (maxIdx - minIdx + 1)) + minIdx;
-                    
+                    // ቁልፍ ቃል የመምረጫ ሎጂክ
+                    let blankIndex = -1;
+                    for (let wIdx = Math.floor(words.length * 0.2); wIdx < Math.floor(words.length * 0.8); wIdx++) {
+                        let cleanW = words[wIdx].replace(/[^a-zA-Z]/g, "");
+                        if (cleanW.length > 5 && !["which", "there", "their", "would", "should", "about", "these"].includes(cleanW.toLowerCase())) {
+                            blankIndex = wIdx;
+                            break;
+                        }
+                    }
+                    if (blankIndex === -1) continue;
+
                     let correctAnswer = words[blankIndex].replace(/[,.:;()'"embedded’”]/g, "");
-                    if (correctAnswer.length < 4 || /^[0-9]+$/.test(correctAnswer)) continue;
-
                     words[blankIndex] = "_______";
                     let questionText = words.join(" ");
 
-                    let w1 = words[0].replace(/[,.:;()'"’”]/g, "") || "Detail";
-                    let w2 = words[words.length - 1].replace(/[,.:;()'"精度’”]/g, "") || "Concept";
-                    let w3 = currentLanguage === 'am' ? "ቁልፍ ሀሳብ" : "General Idea";
+                    // 2. String-Similarity በመጠቀም የተቀራረቡ የስህተት ምርጫዎችን ማመንጨት
+                    let wrongOptions = [];
+                    if (typeof stringSimilarity !== 'undefined' && stringSimilarity.findBestMatch) {
+                        // ከዋናው የቃላት ባንክ ውስጥ ተመሳሳይ ፊደላት ያላቸውን ፈልግ
+                        let matches = stringSimilarity.findBestMatch(correctAnswer, globalWordsPool);
+                        let sortedMatches = matches.ratings
+                            .filter(m => m.target.toLowerCase() !== correctAnswer.toLowerCase() && m.target.length > 3)
+                            .sort((a, b) => b.rating - a.rating)
+                            .slice(0, 15);
+                        
+                        if(sortedMatches.length >= 3) {
+                            // ምርጥ 3 የተቀራረቡ ቃላትን ምርጫ እናድርግ
+                            wrongOptions = [sortedMatches[0].target, sortedMatches[1].target, sortedMatches[2].target];
+                        }
+                    } 
+                    
+                    // ከተበላሸ ወይም ላይብረሪው ካልተጫነ ፎልባክ ቃላት መተኪያ
+                    if (wrongOptions.length < 3) {
+                        wrongOptions = [
+                            words[0].replace(/[^a-zA-Z]/g, "") || "Concept",
+                            words[words.length - 1].replace(/[^a-zA-Z]/g, "") || "Theory",
+                            "General Application"
+                        ];
+                    }
 
-                    let optsArray = [`**${correctAnswer}`, w1, w2, w3];
+                    let optsArray = [`**${correctAnswer}`, wrongOptions[0], wrongOptions[1], wrongOptions[2]];
                     optsArray.sort(() => Math.random() - 0.5);
 
                     finalQuestionsList.push({
-                        q: `[Chapter ${initialChapter + ch}] ${questionText}`,
+                        q: `[Chapter ${currentChapterNum}] ${questionText}`,
                         opts: optsArray
                     });
 
@@ -1019,6 +1072,7 @@
                 }
             }
 
+            // የመሙያ ጥያቄዎች (ተማሪው የጠየቀው ቁጥር እስኪሞላ)
             while (finalQuestionsList.length < targetQCount) {
                 finalQuestionsList.push({
                     q: currentLanguage === 'am' ? `[ክለሳ] ከዚህ ከተመረጠው የመማሪያ ክፍል ይዘት መረዳት እንደሚቻለው የተሰጠው አረፍተ ነገር ________ ነው።` : `[Review] Based on the context of this material, the given statement is ________.`,
@@ -1190,7 +1244,6 @@
             nav('p-review');
         }
 
-        // 100% በእውነተኛ መረጃ (Real-Data Comparison) ላይ የተመሰረተ ጠንካራ የ AI ትንተና ሎጂክ
         function loadAIAnalytics() {
             let lastPct = localStorage.getItem('last_score_pct');
             let lastSub = localStorage.getItem('last_sub_played');
@@ -1204,7 +1257,6 @@
                 return;
             }
 
-            // 1. የኮች መልእክት (AI Coach Statement)
             let coachMsg = "";
             if (currentLanguage === 'am') {
                 if(lastPct >= 85) {
@@ -1225,9 +1277,7 @@
             }
             document.getElementById('ai-coach-msg').innerText = coachMsg;
 
-            // 2. እውነተኛ የውጤት ንፅፅር ሎጂክ (Real Progress Tracker) - መላምት የሌለው
             let historyHtml = "";
-            // ከተመሳሳይ የትምህርት አይነት ከዚህ በፊት የተሰሩ ታሪኮችን መለየት
             let sameSubHistory = history.filter(h => h.subject === lastSub);
             
             if (sameSubHistory.length >= 2) {
@@ -1259,7 +1309,6 @@
             }
             document.getElementById('ai-progress-history-list').innerHTML = historyHtml;
 
-            // 3. የድክመት መለያ ክፍለ-ጊዜ
             let weakHtml = "<ul>";
             let entries = Object.entries(weakZones);
             if(entries.length === 0) {
@@ -1273,7 +1322,6 @@
             }
             document.getElementById('ai-weak-list').innerHTML = weakHtml;
 
-            // 4. የወደፊት ሙያ አመላካች
             let subScores = {};
             history.forEach(h => {
                 if(!subScores[h.subject]) subScores[h.subject] = { total: 0, count: 0 };
@@ -1310,7 +1358,6 @@
             }
             document.getElementById('ai-career-txt').innerHTML = careerText;
 
-            // 5. ብጁ የጥናት እቅድ (ትክክለኛ ምክር - የደከመበትን ትምህርት እዚህ አንብብ ይለዋል)
             let topWeakChapter = entries[0] ? entries[0][0] : (currentLanguage === 'am' ? "አጠቃላይ ይዘቶች ክለሳ" : "Core Revision Areas");
             let planHtml = "";
             
@@ -1357,7 +1404,7 @@
                     </table>
                 `;
             }
-            document.getElementById('stud-table' ? 'stud-table' : 'ai-study-table').innerHTML = planHtml;
+            document.getElementById('ai-study-table').innerHTML = planHtml;
             nav('p-analytics');
         }
 
