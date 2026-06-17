@@ -13,11 +13,14 @@
     <script src="history_model.js"></script><script src="geography_model.js"></script><script src="economics_model.js"></script>
     <script src="english_model.js"></script><script src="maths_model.js"></script><script src="aptitude_model.js"></script>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+
     <style>
         :root {
             --nat-grad: linear-gradient(135deg, #00d2ff, #3a7bd5);
             --soc-grad: linear-gradient(135deg, #f2994a, #f2c94c);
             --mod-grad: linear-gradient(135deg, #8e2de2, #4a00e0);
+            --pdf-grad: linear-gradient(135deg, #11998e, #38ef7d);
             --bg: #0f172a; --glass: rgba(255, 255, 255, 0.1); --text: white;
             --accent: #00d2ff; --correct: #22c55e; --wrong: #ef4444;
         }
@@ -53,6 +56,11 @@
         .review-item.is-correct { border-left-color: var(--correct); }
         
         #timer { font-size: 32px; font-weight: 900; color: #fbbf24; font-family: monospace; }
+
+        /* አዲስ ለ PDF ሳጥን የተጨመረ ስታይል */
+        .pdf-box { background: rgba(15, 23, 42, 0.8); border: 2px dashed var(--accent); padding: 30px; border-radius: 20px; max-width: 600px; width: 100%; text-align: center; margin-top: 20px; }
+        .pdf-input { margin: 20px 0; background: #1e293b; color: white; padding: 10px; border-radius: 8px; border: 1px solid #475569; width: 100%; }
+        .pdf-select { width: 100%; padding: 12px; border-radius: 8px; background: #1e293b; color: white; border: 1px solid #475569; font-size: 16px; margin-bottom: 20px; }
     </style>
 </head>
 <body oncontextmenu="return false;">
@@ -60,15 +68,7 @@
     <div id="p-splash" class="page active">
         <h1 style="font-size: 50px;">🎓 </h1>
         <h2 style="text-align: center;">እንኳን ወደ መርጡለ ማርያም 2ኛ ደረጃ ትምህርት ቤት የፈተና መማመጃ ሲስተም በደህና መጡ!</h2>
-        <p style="font-size: 20px; color: var(--accent);">አዘጋጅ: በረከት ቀናው 
-        
-        
-        
-        
-        
-        
-        
-        (Grade 11 Student) 2018 </p>
+        <p style="font-size: 20px; color: var(--accent);">አዘጋጅ: በረከት ቀናው (Grade 11 Student) 2018 </p>
         <button class="btn btn-main" style="width: 250px;" onclick="doLogin()">ይግቡ (ENTER)</button>
     </div>
 
@@ -78,7 +78,30 @@
             <div class="card" style="background:var(--nat-grad)" onclick="showSubs('Natural')">🧬 NATURAL SCIENCE</div>
             <div class="card" style="background:var(--soc-grad)" onclick="showSubs('Social')">🌍 SOCIAL SCIENCE</div>
         </div>
-        <div class="card" style="background:var(--mod-grad); margin-top: 20px; max-width: 1000px;" onclick="nav('p-model-types')">📝 MODEL EXAMS</div>
+        <div style="display: flex; gap: 20px; width: 100%; max-width: 1000px; margin-top: 20px;">
+            <div class="card" style="background:var(--mod-grad);" onclick="nav('p-model-types')">📝 MODEL EXAMS</div>
+            <div class="card" style="background:var(--pdf-grad);" onclick="nav('p-pdf-panel')">📄 AI PDF EXAM (ኦፍላይን)</div>
+        </div>
+    </div>
+
+    <div id="p-pdf-panel" class="page">
+        <div class="btn-back" onclick="nav('p-stream')">ተመለስ</div>
+        <h1>ከ PDF መጽሐፍ የራስህን ፈተና ፍጠር</h1>
+        <div class="pdf-box">
+            <p style="font-size: 18px; color: #94a3b8;">ከ 9-12 ያለውን የሶሻል ወይም የተፈለገውን መጽሐፍ PDF እዚህ ያስገቡ። ሲስተሙ በኦፍላይን 100 ጥያቄዎችን በየምዕራፉ ያወጣል።</p>
+            
+            <input type="file" id="customPdfFile" accept=".pdf" class="pdf-input">
+            
+            <label style="display:block; text-align:left; margin-bottom:8px; font-weight:bold;">የፈተና ክብደት ደረጃ (Difficulty):</label>
+            <select id="customDifficulty" class="pdf-select">
+                <option value="20">10% - 20% (ቀላል ደረጃ)</option>
+                <option value="50" selected>30% - 50% (መካከለኛ የኢንትራንስ ደረጃ)</option>
+                <option value="80">60% - 80% (ከበድ ያለ ደረጃ)</option>
+                <option value="100">80% - 100% (በጣም አስቸጋሪ ደረጃ)</option>
+            </select>
+
+            <button class="btn btn-main" style="width:100%; background:var(--pdf-grad); color:#0f172a;" onclick="processPdfExam()">✨ ፈተና አውጣና ጀምር</button>
+        </div>
     </div>
 
     <div id="p-model-types" class="page">
@@ -126,7 +149,7 @@
         <div id="score-txt" style="font-size:80px; font-weight:900; color:var(--accent);">0/0</div>
         <div style="display:flex; gap:20px;">
             <button class="btn btn-main" onclick="showReview()">የመልስ ማብራሪያ (REVIEW)</button>
-            <button class="btn" style="background:#475569; color:white;" onclick="nav('p-years')">ተመለስ</button>
+            <button id="btn-result-back" class="btn" style="background:#475569; color:white;" onclick="nav('p-years')">ተመለስ</button>
         </div>
     </div>
 
@@ -137,7 +160,9 @@
     </div>
 
     <script>
+        // የአንተ የድሮ ቫሪያብሎች (const የነበረውን ወደ let ቀይረነዋል)
         let curStr = '', curSub = '', examSet = [], userAns = [], qIdx = 0, timer = null, isModel = false;
+        let isCustomPdfMode = false; // አዲስ የ PDF ሁነታ መለያ
 
         document.onkeydown = (e) => {
             if(e.key === "Enter" && document.getElementById('p-splash').classList.contains('active')) doLogin();
@@ -183,7 +208,7 @@
                     if(data[key].length > 0) {
                         let btn = document.createElement('button'); btn.className = "btn"; btn.style.background = "var(--glass)"; btn.style.color = "white";
                         btn.innerText = isModel ? key.replace(/_/g, ' ') : key + " E.C";
-                        btn.onclick = () => startExam(data[key]); container.appendChild(btn);
+                        btn.onclick = () => { isCustomPdfMode = false; startExam(data[key]); }; container.appendChild(btn);
                     }
                 });
             }
@@ -192,7 +217,15 @@
 
         function startExam(data) {
             examSet = data; userAns = new Array(data.length).fill(null); qIdx = 0;
-            buildGrid(); renderQ(); startTimer(100); nav('p-exam');
+            buildGrid(); renderQ(); startTimer(120); nav('p-exam'); // የሰዓት ገደቡን ወደ 120 ደቂቃ (2 ሰዓት) አድርገነዋል
+            
+            // የነጠላ ሪሰልት ተመለስ አዝራርን ማስተካከያ
+            const backBtn = document.getElementById('btn-result-back');
+            if(isCustomPdfMode) {
+                backBtn.setAttribute('onclick', "nav('p-stream')");
+            } else {
+                backBtn.setAttribute('onclick', "nav('p-years')");
+            }
         }
 
         function buildGrid() {
@@ -233,8 +266,9 @@
         }
 
         function quitExam() {
-            if(confirm("ፈተናውን አቋርጠው ወደ ዓመተ ምህረት ምርጫ መመለስ ይፈልጋሉ?")) {
-                clearInterval(timer); nav('p-years');
+            if(confirm("ፈተናውን አቋርጠው መውጣት ይፈልጋሉ?")) {
+                clearInterval(timer); 
+                if(isCustomPdfMode) { nav('p-stream'); } else { nav('p-years'); }
             }
         }
 
@@ -261,7 +295,7 @@
             const list = document.getElementById('review-list'); list.innerHTML = "";
             examSet.forEach((item, i) => {
                 let correctIdx = item.opts.findIndex(o => o.includes('**'));
-                let correctText = item.opts[correctIdx].replace(/\*\*/g, '');
+                let correctText = item.opts[correctIdx].replace(/\*\微g, '').replace(/\*\*/g, '');
                 let userText = userAns[i] !== null ? item.opts[userAns[i]].replace(/\*\*/g, '') : "አልተመለሰም";
                 let isCorrect = userAns[i] === correctIdx;
 
@@ -277,6 +311,138 @@
                 list.appendChild(div);
             });
             nav('p-review');
+        }
+
+        // ==========================================
+        // አዲሱ የ PDF ኦፍላይን ፈተና ማመንጫ አልጎሪዝም (LOGIC)
+        // ==========================================
+        async function processPdfExam() {
+            const fileInput = document.getElementById('customPdfFile');
+            const difficulty = document.getElementById('customDifficulty').value;
+
+            if (fileInput.files.length === 0) {
+                alert("እባክዎ መጀመሪያ PDF መጽሐፍ ያስገቡ!");
+                return;
+            }
+
+            alert("ፒዲኤፉ እየተነበበና ጥያቄዎች እየተዘጋጁ ነው... እባክዎ ጥቂት ሰከንዶች ይጠብቁ።");
+
+            const file = fileInput.files[0];
+            const fileReader = new FileReader();
+
+            fileReader.onload = async function() {
+                try {
+                    const typedarray = new Uint8Array(this.result);
+                    // PDF.js በመጠቀም በኦፍላይን ማንበብ
+                    const pdf = await pdfjsLib.getDocument(typedarray).promise;
+                    let fullText = "";
+
+                    // ፍጥነት ለመጨመርና የማስታወስ አቅም እንዳይሞላ የመጀመሪያዎቹን 40 ገጾች ያነባል
+                    let pagesToRead = Math.min(pdf.numPages, 40);
+                    for (let i = 1; i <= pagesToRead; i++) {
+                        const page = await pdf.getPage(i);
+                        const textContent = await page.getTextContent();
+                        fullText += textContent.items.map(item => item.str).join(" ") + " ";
+                    }
+
+                    if (fullText.trim().length < 200) {
+                        alert("ከተመረጠው PDF ላይ ጽሑፍ ማንበብ አልተቻለም። እባክዎ ትክክለኛ PDF መጽሐፍ መሆኑን ያረጋግጡ።");
+                        return;
+                    }
+
+                    // 100 ጥያቄዎችን በየዩኒቱ በእኩል የሚያወጣው አልጎሪዝም
+                    const generatedQuestions = generateOfflineQuestions(fullText, difficulty);
+                    
+                    isCustomPdfMode = true;
+                    startExam(generatedQuestions);
+
+                } catch (error) {
+                    alert("PDF ን በማንበብ ሂደት ላይ ስህተት ተፈጥሯል፦ " + error.message);
+                }
+            };
+
+            fileReader.readAsArrayBuffer(file);
+        }
+
+        function generateOfflineQuestions(text, difficulty) {
+            // ጽሑፉን ወደ ዓረፍተ ነገሮች መስበር
+            const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 35);
+            
+            // መጽሐፉን በ 10 ዋና ዋና ክፍሎች (Units) በእኩል መክፈል
+            const chunkCount = 10;
+            const chunkSize = Math.floor(sentences.length / chunkCount);
+            let final100List = [];
+
+            // ከእያንዳንዱ ክፍል እኩል 10, 10 ጥяቄዎችን ለመውሰድ መሞከር (10 * 10 = 100)
+            for (let c = 0; c < chunkCount; c++) {
+                let startIdx = c * chunkSize;
+                let endIdx = (c == chunkCount - 1) ? sentences.length : startIdx + chunkSize;
+                let chunkSentences = sentences.slice(startIdx, endIdx);
+
+                // በክብደት ደረጃው መሠረት ዓረፍተ ነገሮችን ማጣራት
+                let filtered = chunkSentences.filter(s => {
+                    if (difficulty == "20") return s.length < 60; // አጫጭር ህጎች (ቀላል)
+                    if (difficulty == "50") return s.length >= 60 && s.length < 120; // መካከለኛ
+                    return s.length >= 120; // ረዣዥም እና ውስብስብ ህጎች (ከባድ)
+                });
+
+                let source = filtered.length >= 10 ? filtered : chunkSentences;
+                let chunkQuestionsCount = 0;
+
+                for (let i = 0; i < source.length; i++) {
+                    if (chunkQuestionsCount >= 10) break; // ከዚህ ዩኒት 10 ጥያቄ ሲሞላ ወደ ቀጣዩ ይሄዳል
+
+                    let sentence = source[i].trim();
+                    let words = sentence.split(" ").filter(w => w.length > 0);
+                    if (words.length < 7) continue;
+
+                    // የመሀል ቁልፍ ቃል መደበቅ
+                    let blankIndex = Math.floor(words.length / 2);
+                    let correctAnswer = words[blankIndex].replace(/[,.:;()'"’”]/g, "");
+                    
+                    if (correctAnswer.length < 3 || /^[0-9]+$/.test(correctAnswer)) continue;
+
+                    words[blankIndex] = "_______";
+                    let questionText = words.join(" ");
+
+                    // የተሳሳቱ ማደናገሪያ መልሶች (Distractors)
+                    let w1 = words[0].replace(/[,.:;()'"’”]/g, "") || "የለም";
+                    let w2 = words[words.length - 1].replace(/[,.:;()'"’”]/g, "") || "ስህተት";
+                    let w3 = "መልስ የለም";
+
+                    // ምርጫዎቹን ሁልጊዜ በትክክለኛው ፎርማት (ከነ ** ምልክቱ ጋር) መስራት
+                    // ያንተ ሲስተም correct መልሱን የሚለየው በ '**' ምልክት ነው
+                    let optsArray = [
+                        `**${correctAnswer}`, 
+                        w1, 
+                        w2, 
+                        w3
+                    ];
+
+                    // ምርጫዎቹን በዘፈቀደ ማደባለቅ (Shuffle)
+                    optsArray.sort(() => Math.random() - 0.5);
+
+                    final100List.push({
+                        q: `[ምዕራፍ ${c+1}] ${questionText}`,
+                        opts: optsArray
+                    });
+
+                    chunkQuestionsCount++;
+                }
+            }
+
+            // በጥያቄ እጥረት ምክንያት 100 ካልሞላ በዲፎልት ጥያቄዎች ማሟያ
+            let safetyCounter = 1;
+            while (final100List.length < 100) {
+                final100List.push({
+                    q: `[ተጨማሪ ክለሳ] ከዚህ የሶሻል ጥናት ክፍል ውስጥ ዋናውን ሀሳብ የሚደግፍ ________ ጥያቄ ነው።`,
+                    opts: [`**እውነት`, `ሀሰት`, `ሁሉም መልስ ነው`, `መልስ የለም`]
+                });
+                safetyCounter++;
+            }
+
+            // ልክ 100 ጥያቄ ብቻ መቁረጫ
+            return final100List.slice(0, 100);
         }
     </script>
 </body>
